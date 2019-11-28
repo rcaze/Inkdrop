@@ -39,7 +39,7 @@ def adjust_spines(ax, spines):
         ax.xaxis.set_ticks([])
 
 
-def ink_drop(ndrops, ax=None, save=None):
+def ink_drop(ndrops, ax=None, down=False, color=False, save=None):
     """Generate a drawing of diluted inkdrops"""
     if not ax:
         ax = plt.axes()
@@ -47,14 +47,35 @@ def ink_drop(ndrops, ax=None, save=None):
     # Generate the random position of the drops
     xpos = random.rand(ndrops)
     ypos = random.rand(ndrops)
-    # Set the linearly deacrising opacity of drops
     op = np.linspace(0,1, ndrops)
+
+
+    if down:
+        xpos = np.concatenate((random.rand(ndrops//2),
+                               random.rand(ndrops//4)*2,
+                               random.rand(ndrops//4)*3))
+        random.shuffle(op)
+
+
+    if color:
+        xpos = np.concatenate((random.rand(ndrops//3),
+                               random.rand(ndrops//3)+1,
+                               random.rand(ndrops//3)+2))
+        color = [(random.rand(), 0, 0) for i in range(ndrops//3)]
+        color += [(0, random.rand(), 0) for i in range(ndrops//3)]
+        color += [(0, 0, random.rand()) for i in range(ndrops//3)]
+        random.shuffle(op)
+    else:
+        color = ["black" for i in range(ndrops)]
+    r = random.rand(ndrops)*0.04
     for i in range(ndrops):
+        #color = (0, random.rand(), random.rand())
+        #color = 'black'
         circle = plt.Circle((xpos[i], ypos[i]),
-                            radius=0.025, fc='black',
+                            radius=r[i], fc=color[i],
                             alpha=op[i])
         ax.add_patch(circle)
-
+    #ax.set_ylim(0,1)
     plt.axis('scaled') #To be sure to have a square
     if not save:
         plt.show()
@@ -64,7 +85,13 @@ def ink_drop(ndrops, ax=None, save=None):
         plt.close()
         return
 
+
 if __name__ == "__main__":
-    ndrops = 1000
-    save = "InkDrop0.png"
+    ndrops = 3000
+    save = "inkdrop0.png"
     ink_drop(ndrops,save=save)
+    save = "inkdropless.png"
+    ink_drop(ndrops,save=save, down=True)
+    save = "inkdroprgb.png"
+    ink_drop(ndrops,save=save, color=True)
+
